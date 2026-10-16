@@ -1,8 +1,8 @@
-#include <WİFİ.h>
+#include <WiFi.h>
 
-//Wi-fi bilgileri
-const char* ssid = "ESP32";
-const char* password = "f4i3kd5l";
+// Wi-Fi credentials
+const char* ssid = "YOUR_SSID";
+const char* password = "YOUR_PASSWORD";
 
 WiFiServer server(80);
 const int ledPin = 5;
@@ -12,32 +12,32 @@ void setup() {
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW);
 
-  //Wi-fi'ye bağlanma aşaması
-  Serial.print("Wi-fi ağına bağlanılıyor...");
+  // Connect to Wi-Fi
+  Serial.print("Connecting to Wi-Fi...");
   WiFi.begin(ssid, password);
 
-  while(WiFi.status != WL_CONNECTED){
+  while(WiFi.status() != WL_CONNECTED){
     delay(1000);
     Serial.print(".");
   }
 
-  Serial.println("\nWi-Fi bağlantısı başarılı");
-  Serial.print("Esp32 IP Adresi: ");
+  Serial.println("\nWi-Fi connected");
+  Serial.print("ESP32 IP address: ");
   Serial.println(WiFi.localIP());
-  
-  server.begin();//Burada artık web sunucusunu başlatıyoruz
+
+  server.begin(); // Start the web server
 }
 
 void loop() {
-  WiFi client = server.available();
+  WiFiClient client = server.available();
 
   if(client){
-    Serial.println("Yeni istemci bağlandı.");
+    Serial.println("New client connected.");
     String request = client.readStringUntil('\r');
     Serial.println(request);
     client.flush();
 
-    //LED ac/kapat kontrolü
+    // LED on/off control
     if(request.indexOf("/LED_ON") != -1){
       digitalWrite(ledPin, HIGH);
     }
@@ -45,21 +45,21 @@ void loop() {
       digitalWrite(ledPin, LOW);
     }
 
-    //HTML sayfası
+    // HTML page
     client.println("HTTP/1.1 200 OK");
     client.println("Content-type:text/html");
     client.println();
 
     client.println("<html><body>");
-    client.println("<h1>ESP32 LED kontol</h1>");
-    client.println("<p><a href=\"/LED_ON\">LED Aç</a><p>");
-    client.println("<p><a href=\"/LED_OFF\">LED Kapat</a></p>");
+    client.println("<h1>ESP32 LED control</h1>");
+    client.println("<p><a href=\"/LED_ON\">LED On</a></p>");
+    client.println("<p><a href=\"/LED_OFF\">LED Off</a></p>");
     client.println("</body></html>");
 
     delay(1);
-    Serial.println("İstemci bağlantısı sonlandı.");
+    Serial.println("Client disconnected.");
 
   }
-  
+
 
 }
